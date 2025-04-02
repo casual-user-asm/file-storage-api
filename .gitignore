@@ -1,0 +1,37 @@
+# Go-related ignores
+*.exe
+*.out
+*.test
+*.log
+
+# Compiled Object files
+*.o
+*.a
+*.so
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Go Modules and Vendor
+/go/bin/
+/go/pkg/
+/go/src/
+vendor/
+
+# Dependency files
+Gopkg.lock
+Gopkg.toml
+
+# MinIO data storage (if using local storage)
+minio_data/
+
+# Environment variables
+.env
+
+# Docker
+.dockerignore
+docker-compose.yml
+.DS_Store
