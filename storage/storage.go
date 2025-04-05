@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"log"
-
 	"os"
 
 	"github.com/minio/minio-go/v7"
@@ -12,18 +11,18 @@ import (
 
 var minioClient *minio.Client
 var ctx = context.Background()
-var bucketName = os.Getenv("MINIO_BUCKET")
 
 func InitMinio() {
 	endpoint := os.Getenv("MINIO_ENDPOINT")
 	accessKey := os.Getenv("MINIO_ROOT_USER")
 	secretKey := os.Getenv("MINIO_ROOT_PASSWORD")
+	bucketName := os.Getenv("MINIO_BUCKET")
 	location := "us-east-1"
 	var err error
 
 	minioClient, err = minio.New(endpoint, &minio.Options{
-		Creds: credentials.NewStaticV4(accessKey, secretKey, ""),
-		Secure: true,
+		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+		Secure: false,
 	})
 	if err != nil {
 		log.Fatalf("Error to init minio client %v", err)
@@ -44,6 +43,7 @@ func InitMinio() {
 }
 
 func UploadFile(objectName, filePath string) error {
+	bucketName := os.Getenv("MINIO_BUCKET")
 	contentType := "application/octet-stream"
 	info, err := minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
 	if err != nil {
@@ -53,5 +53,15 @@ func UploadFile(objectName, filePath string) error {
 
 	log.Printf("Successfully uploaded %s of size %d\n", objectName, info.Size)
 
+	return nil
+}
+
+func DownloadFile(bucketName, objectName, filePath string) error {
+	err := minioClient.FGetObject(ctx, bucketName, objectName, filePath, minio.GetObjectOptions{})
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	log.Printf("Successfully download  %s", objectName)
 	return nil
 }
