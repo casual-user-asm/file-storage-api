@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 
@@ -42,10 +43,10 @@ func InitMinio() {
 	}
 }
 
-func UploadFile(objectName, filePath string) error {
+func UploadFile(objectName string, file io.Reader, fileSize int64, content string) error {
 	bucketName := os.Getenv("MINIO_BUCKET")
-	contentType := "application/octet-stream"
-	info, err := minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
+	contentType := content
+	info, err := minioClient.PutObject(ctx, bucketName, objectName, file, fileSize, minio.PutObjectOptions{ContentType: contentType})
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -56,12 +57,30 @@ func UploadFile(objectName, filePath string) error {
 	return nil
 }
 
-func DownloadFile(bucketName, objectName, filePath string) error {
-	err := minioClient.FGetObject(ctx, bucketName, objectName, filePath, minio.GetObjectOptions{})
+func DownloadFile(objectName string) error {
+	bucketName := os.Getenv("MINIO_BUCKET")
+	_, err := minioClient.GetObject(ctx, bucketName, objectName, minio.GetObjectOptions{})
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 	log.Printf("Successfully download  %s", objectName)
 	return nil
+}
+
+func ListAllFiles() ([]string, error) {
+	bucketName := os.Getenv("MINIO_BUCKET")
+	var fileNames []string
+
+	allFiles := minioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
+		Recursive: true,
+	})
+
+	for file := range allFiles {
+		if file.Err != nil {
+			return nil, file.Err
+		}
+		fileNames = append(fileNames, file.Key)
+	}
+	return fileNames, nil
 }

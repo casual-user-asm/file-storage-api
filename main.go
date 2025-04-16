@@ -2,8 +2,11 @@ package main
 
 import (
 	"file-storage-api/config"
+	"file-storage-api/handlers"
 	"file-storage-api/storage"
-	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -12,13 +15,19 @@ func init() {
 }
 
 func main() {
-	err := storage.UploadFile("test", "/mnt/c/Users/Vladick/Downloads/test.jpg")
-	if err != nil {
-		fmt.Printf("Error upload the file: %v", err)
-	}
-
-	err = storage.DownloadFile("test", "test", "/mnt/c/Users/Vladick/Pictures/download.jpg")
-	if err != nil {
-		fmt.Printf("Error download the file: %v", err)
-	}
+	router := gin.Default()
+	router.LoadHTMLGlob("templates/*")
+	router.GET("", func(c *gin.Context) {
+		files, err := storage.ListAllFiles()
+		if err != nil {
+			c.String(http.StatusBadRequest, "Error: %v", err)
+		}
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "Main page for files",
+			"files": files,
+		})
+	})
+	router.POST("/upload", handlers.UploadFileHandler)
+	router.GET("/files/:file", handlers.DownLoadFileHandler)
+	router.Run(":8080")
 }

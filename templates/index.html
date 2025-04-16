@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ .title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        form {
+            margin-bottom: 2rem;
+        }
+
+        input[type="file"] {
+            margin-bottom: 1rem;
+        }
+
+        .file-list a {
+            display: block;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Upload and Download Files</h1>
+
+        <!-- File Upload Form -->
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required />
+            <br />
+            <button type="submit">Upload</button>
+        </form>
+
+        <!-- File List for Download -->
+        <div class="file-list">
+            <h2>Available Files:</h2>
+            {{ range .files }}
+            <a href="/files/{{ . }}" download>{{ . }}</a>
+            {{ else }}
+            <p>No files here</p>
+            {{ end }}
+        </div>
+    </div>
+</body>
+
+</html>
