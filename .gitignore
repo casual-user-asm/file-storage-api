@@ -33,5 +33,4 @@ minio_data/
 
 # Docker
 .dockerignore
-docker-compose.yml
 .DS_Store
